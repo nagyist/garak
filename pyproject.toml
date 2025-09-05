@@ -54,7 +54,8 @@ authors = [
   { name = "Jack Kelly" },
   { name = "Amrit Prakash" },
 ]
-license = { file = "LICENSE" }
+license = "Apache-2.0"
+license-files = ["LICENSE"]
 description = "LLM vulnerability scanner"
 readme = "README.md"
 classifiers = [
@@ -63,7 +64,6 @@ classifiers = [
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Operating System :: OS Independent",
-    "License :: OSI Approved :: Apache Software License",
 ]
 requires-python = ">=3.10"
 dependencies = [
