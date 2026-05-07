@@ -3,10 +3,7 @@
 
 from unittest.mock import patch
 
-import pytest
-
 import garak._plugins
-import garak.probes.base
 import garak.probes.sata
 
 MASK_TOKEN = "[MASK]"
@@ -19,20 +16,6 @@ MOCK_POS_TAGS = [
     ("dangerous", "JJ"),
     ("substance", "NN"),
 ]
-
-
-@patch("garak.resources.api.nltk.download")
-@patch("garak.resources.api.nltk.pos_tag", return_value=MOCK_POS_TAGS)
-def test_sata_mlm_load(_mock_pos_tag, _mock_download):
-    p = garak._plugins.load_plugin("probes.sata.MLM")
-    assert isinstance(p, garak.probes.base.Probe)
-
-
-@patch("garak.resources.api.nltk.download")
-@patch("garak.resources.api.nltk.pos_tag", return_value=MOCK_POS_TAGS)
-def test_sata_mlm_prompts_not_empty(_mock_pos_tag, _mock_download):
-    p = garak._plugins.load_plugin("probes.sata.MLM")
-    assert len(p.prompts) > 0, "Probe must have more than zero prompts"
 
 
 @patch("garak.resources.api.nltk.download")

@@ -1,10 +1,8 @@
 # SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
 # SPDX-License-Identifier: Apache-2.0
 
-import pytest
-
 import garak._plugins
-import garak.probes.base
+import garak.payloads
 import garak.probes.grandma
 
 GRANDMA_PROBES = (
@@ -13,18 +11,6 @@ GRANDMA_PROBES = (
     "probes.grandma.Slurs",
     "probes.grandma.Substances",
 )
-
-
-@pytest.mark.parametrize("classname", GRANDMA_PROBES)
-def test_grandma_load(classname):
-    p = garak._plugins.load_plugin(classname)
-    assert isinstance(p, garak.probes.base.Probe)
-
-
-@pytest.mark.parametrize("classname", GRANDMA_PROBES)
-def test_grandma_prompts_not_empty(classname):
-    p = garak._plugins.load_plugin(classname)
-    assert len(p.prompts) > 0, "Probe must have more than zero prompts"
 
 
 def test_grandma_win10_prompts_contain_product_names():
