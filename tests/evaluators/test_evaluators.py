@@ -620,8 +620,7 @@ def test_evaluate_with_z_scores(eval_setup):
     with patch("garak.analyze.calibration.Calibration") as MockCal:
         mock_cal = MagicMock()
         mock_cal.get_z_score.return_value = 1.5
-        # defcon_and_comment returns (defcon_level, symbol_from_SYMBOL_SET)
-        mock_cal.defcon_and_comment.return_value = (4, "\U0001f7e9")
+        mock_cal.defcon_and_comment.return_value = (4, "ok")
         MockCal.return_value = mock_cal
         evaluator = ThresholdEvaluator(0.5)
 
