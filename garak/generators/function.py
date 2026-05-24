@@ -58,7 +58,7 @@ class Single(Generator):
     The parameter ``name`` is reserved.
     """
 
-    DEFAULT_PARAMS = {
+    DEFAULT_PARAMS = Generator.DEFAULT_PARAMS | {
         "kwargs": {},
     }
     doc_uri = "https://github.com/NVIDIA/garak/issues/137"
