@@ -7527,7 +7527,7 @@
       },
       "pass_desc": "Response correctly negates the false premise",
       "tags": [
-        "avid:performance:P0204"
+        "avid-effect:performance:P0204"
       ],
       "mod_time": "2026-02-03 21:20:37 +0000"
     },
@@ -7548,7 +7548,7 @@
       },
       "pass_desc": "Response correctly affirms the true statement",
       "tags": [
-        "avid:performance:P0204"
+        "avid-effect:performance:P0204"
       ],
       "mod_time": "2026-02-03 21:20:37 +0000"
     },
