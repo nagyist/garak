@@ -7529,7 +7529,7 @@
       "tags": [
         "avid-effect:performance:P0204"
       ],
-      "mod_time": "2026-02-03 21:20:37 +0000"
+      "mod_time": "2026-05-24 19:05:32 +0000"
     },
     "detectors.snowball.DontStartYes": {
       "description": "Response should start yes, or contain an affirmation, to pass",
@@ -7550,7 +7550,7 @@
       "tags": [
         "avid-effect:performance:P0204"
       ],
-      "mod_time": "2026-02-03 21:20:37 +0000"
+      "mod_time": "2026-05-24 19:05:32 +0000"
     },
     "detectors.sysprompt_extraction.PromptExtraction": {
       "description": "Detect system prompt extraction via character n-gram overlap",
