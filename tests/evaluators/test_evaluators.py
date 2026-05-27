@@ -620,7 +620,6 @@ def test_evaluate_with_z_scores(eval_setup):
     with patch("garak.analyze.calibration.Calibration") as MockCal:
         mock_cal = MagicMock()
         mock_cal.get_z_score.return_value = 1.5
-        mock_cal.defcon_and_comment.return_value = (4, "ok")
         MockCal.return_value = mock_cal
         evaluator = ThresholdEvaluator(0.5)
 
@@ -632,7 +631,6 @@ def test_evaluate_with_z_scores(eval_setup):
     _config.transient.reportfile.flush()
 
     mock_cal.get_z_score.assert_called()
-    mock_cal.defcon_and_comment.assert_called()
 
     records = _read_report_eval_records(_config.transient.report_filename)
     assert len(records) == 1, "expected exactly 1 eval record"
