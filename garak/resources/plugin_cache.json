@@ -4026,7 +4026,15 @@
     },
     "probes.promptinject.HijackHateHumans": {
       "description": "PromptInject is a framework that assembles prompts in a modular fashion to provide a quantitative analysis of the robustness of LLMs to adversarial prompt attacks. trophy Best Paper Awards @ NeurIPS ML Safety Workshop 2022",
-      "DEFAULT_PARAMS": {},
+      "DEFAULT_PARAMS": {
+        "generation_params": [
+          "temperature",
+          "top_p",
+          "frequency_penalty",
+          "presence_penalty",
+          "max_tokens"
+        ]
+      },
       "active": true,
       "doc_uri": "",
       "extended_detectors": [],
@@ -4048,11 +4056,19 @@
         "payload:unwanted:violence"
       ],
       "tier": 2,
-      "mod_time": "2026-02-02 14:10:11 +0000"
+      "mod_time": "2026-02-04 22:03:01 +0000"
     },
     "probes.promptinject.HijackHateHumansFull": {
       "description": "PromptInject is a framework that assembles prompts in a modular fashion to provide a quantitative analysis of the robustness of LLMs to adversarial prompt attacks. trophy Best Paper Awards @ NeurIPS ML Safety Workshop 2022",
-      "DEFAULT_PARAMS": {},
+      "DEFAULT_PARAMS": {
+        "generation_params": [
+          "temperature",
+          "top_p",
+          "frequency_penalty",
+          "presence_penalty",
+          "max_tokens"
+        ]
+      },
       "active": false,
       "doc_uri": "",
       "extended_detectors": [],
@@ -4074,11 +4090,19 @@
         "payload:unwanted:violence"
       ],
       "tier": 2,
-      "mod_time": "2026-02-02 14:10:11 +0000"
+      "mod_time": "2026-02-04 22:03:01 +0000"
     },
     "probes.promptinject.HijackKillHumans": {
       "description": "PromptInject is a framework that assembles prompts in a modular fashion to provide a quantitative analysis of the robustness of LLMs to adversarial prompt attacks. trophy Best Paper Awards @ NeurIPS ML Safety Workshop 2022",
-      "DEFAULT_PARAMS": {},
+      "DEFAULT_PARAMS": {
+        "generation_params": [
+          "temperature",
+          "top_p",
+          "frequency_penalty",
+          "presence_penalty",
+          "max_tokens"
+        ]
+      },
       "active": true,
       "doc_uri": "",
       "extended_detectors": [],
@@ -4100,11 +4124,19 @@
         "payload:unwanted:violence"
       ],
       "tier": 2,
-      "mod_time": "2026-02-02 14:10:11 +0000"
+      "mod_time": "2026-02-04 22:03:01 +0000"
     },
     "probes.promptinject.HijackKillHumansFull": {
       "description": "PromptInject is a framework that assembles prompts in a modular fashion to provide a quantitative analysis of the robustness of LLMs to adversarial prompt attacks. trophy Best Paper Awards @ NeurIPS ML Safety Workshop 2022",
-      "DEFAULT_PARAMS": {},
+      "DEFAULT_PARAMS": {
+        "generation_params": [
+          "temperature",
+          "top_p",
+          "frequency_penalty",
+          "presence_penalty",
+          "max_tokens"
+        ]
+      },
       "active": false,
       "doc_uri": "",
       "extended_detectors": [],
@@ -4126,11 +4158,19 @@
         "payload:unwanted:violence"
       ],
       "tier": 2,
-      "mod_time": "2026-02-02 14:10:11 +0000"
+      "mod_time": "2026-02-04 22:03:01 +0000"
     },
     "probes.promptinject.HijackLongPrompt": {
       "description": "PromptInject is a framework that assembles prompts in a modular fashion to provide a quantitative analysis of the robustness of LLMs to adversarial prompt attacks. trophy Best Paper Awards @ NeurIPS ML Safety Workshop 2022",
-      "DEFAULT_PARAMS": {},
+      "DEFAULT_PARAMS": {
+        "generation_params": [
+          "temperature",
+          "top_p",
+          "frequency_penalty",
+          "presence_penalty",
+          "max_tokens"
+        ]
+      },
       "active": true,
       "doc_uri": "",
       "extended_detectors": [],
@@ -4152,11 +4192,19 @@
         "payload:unwanted:violence"
       ],
       "tier": 2,
-      "mod_time": "2026-02-02 14:10:11 +0000"
+      "mod_time": "2026-02-04 22:03:01 +0000"
     },
     "probes.promptinject.HijackLongPromptFull": {
       "description": "PromptInject is a framework that assembles prompts in a modular fashion to provide a quantitative analysis of the robustness of LLMs to adversarial prompt attacks. trophy Best Paper Awards @ NeurIPS ML Safety Workshop 2022",
-      "DEFAULT_PARAMS": {},
+      "DEFAULT_PARAMS": {
+        "generation_params": [
+          "temperature",
+          "top_p",
+          "frequency_penalty",
+          "presence_penalty",
+          "max_tokens"
+        ]
+      },
       "active": false,
       "doc_uri": "",
       "extended_detectors": [],
@@ -4178,7 +4226,7 @@
         "payload:unwanted:violence"
       ],
       "tier": 2,
-      "mod_time": "2026-02-02 14:10:11 +0000"
+      "mod_time": "2026-02-04 22:03:01 +0000"
     },
     "probes.propile.PIILeakQuadruplet": {
       "description": "ProPILE quadruplet probe: uses name + two PIIs to elicit the third.",
