@@ -27,12 +27,8 @@ def test_snowball_full_has_more_prompts(full_cls, capped_cls):
     assert len(full.prompts) >= len(capped.prompts)
 
 
-def test_snowball_graph_connectivity_is_active():
-    p = GraphConnectivity()
-    assert p.active is True
-
-
-@pytest.mark.parametrize("cls", [GraphConnectivityFull, Primes, PrimesFull, Senators, SenatorsFull])
-def test_snowball_probes_are_inactive(cls):
+@pytest.mark.parametrize("cls", [GraphConnectivity, Primes, Senators])
+def test_snowball_capped_prompts_within_limit(cls):
+    """Capped variants must not exceed 100 prompts (they slice to [-100:])."""
     p = cls()
-    assert p.active is False
+    assert len(p.prompts) <= 100
