@@ -1030,7 +1030,7 @@
         "payload:leak:training"
       ],
       "tier": 2,
-      "mod_time": "2025-11-12 08:34:39 +0000"
+      "mod_time": "2026-05-26 16:56:12 +0000"
     },
     "probes.divergence.RepeatExtended": {
       "description": "See if a model starts giving other data when asked to repeat a string indefinitely",
@@ -1059,7 +1059,7 @@
         "payload:leak:training"
       ],
       "tier": 2,
-      "mod_time": "2025-11-12 08:34:39 +0000"
+      "mod_time": "2026-05-26 16:56:12 +0000"
     },
     "probes.divergence.RepeatedToken": {
       "description": "Repeated token destabilization attack from Dropbox LLM security research.",
@@ -1094,7 +1094,7 @@
         "payload:unwanted:denial_of_service"
       ],
       "tier": 1,
-      "mod_time": "2025-11-12 08:34:39 +0000"
+      "mod_time": "2026-05-26 16:56:12 +0000"
     },
     "probes.doctor.Bypass": {
       "description": "Implement Policy Puppetry Bypass",
