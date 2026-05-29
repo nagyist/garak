@@ -1,5 +1,6 @@
 """Support `Anthropic <https://www.anthropic.com>`_ hosted Claude models"""
 
+import inspect
 from typing import List, Tuple
 
 import backoff
@@ -24,14 +25,16 @@ class AnthropicGenerator(Generator):
 
     ENV_VAR = "ANTHROPIC_API_KEY"
     DEFAULT_PARAMS = Generator.DEFAULT_PARAMS | {
-        "name": "claude-sonnet-4-5",
-        "max_tokens": 1024,
+        "uri": None,
+        "suppressed_params": set(),
     }
 
     _unsafe_attributes = ["client"]
 
     def _load_unsafe(self):
-        self.client = self.anthropic.Anthropic(api_key=self.api_key)
+        self.client = self.anthropic.Anthropic(
+            api_key=self.api_key, base_url=self.uri
+        )
 
     def __init__(self, name="", config_root=_config):
         super().__init__(name, config_root)
@@ -64,30 +67,35 @@ class AnthropicGenerator(Generator):
     ) -> List[Message | None]:
         system, messages = self._split_system_and_messages(prompt)
 
-        call_kwargs = {
-            "model": self.name,
-            "max_tokens": self.max_tokens,
-            "messages": messages,
-        }
+        # Map garak's `name` onto the SDK's `model` kwarg, then let
+        # `inspect.signature` pull any other matching params off the generator
+        # so newly added SDK kwargs like `top_p` flow through without an edit.
+        call_kwargs = {"messages": messages}
         if system is not None:
             call_kwargs["system"] = system
-        if self.temperature is not None:
-            call_kwargs["temperature"] = self.temperature
-        if self.top_k is not None:
-            call_kwargs["top_k"] = self.top_k
+        for arg in inspect.signature(self.client.messages.create).parameters:
+            if arg == "model":
+                call_kwargs[arg] = self.name
+                continue
+            if arg in call_kwargs:
+                continue
+            if hasattr(self, arg) and arg not in self.suppressed_params:
+                value = getattr(self, arg)
+                if value is not None:
+                    call_kwargs[arg] = value
 
         try:
             response = self.client.messages.create(**call_kwargs)
-        except Exception as e:
-            backoff_exception_types = [
-                self.anthropic.RateLimitError,
-                self.anthropic.APIConnectionError,
-                self.anthropic.APIStatusError,
-            ]
-            for backoff_exception in backoff_exception_types:
-                if isinstance(e, backoff_exception):
-                    raise GeneratorBackoffTrigger from e
-            raise e
+        except (
+            self.anthropic.RateLimitError,
+            self.anthropic.APIConnectionError,
+            self.anthropic.APITimeoutError,
+            self.anthropic.InternalServerError,
+        ) as e:
+            # Transient: rate limits, connection blips, timeouts, and 5xx from
+            # upstream. Other `APIStatusError` subclasses (400, 401, 403, 404,
+            # 422) are caller bugs and would loop indefinitely if retried.
+            raise GeneratorBackoffTrigger from e
 
         # `content` is a list of blocks; pull the first text block we find.
         text_blocks = [

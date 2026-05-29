@@ -62,6 +62,29 @@ def test_anthropic_no_system_returns_none():
     assert messages == [{"role": "user", "content": "Hi."}]
 
 
+def test_anthropic_default_params_shape():
+    # `max_tokens` is inherited from Generator.DEFAULT_PARAMS, so the override
+    # only adds the Anthropic-specific knobs.
+    assert "uri" in AnthropicGenerator.DEFAULT_PARAMS
+    assert AnthropicGenerator.DEFAULT_PARAMS["uri"] is None
+    assert "max_tokens" in AnthropicGenerator.DEFAULT_PARAMS
+
+
+@pytest.mark.skipif(
+    not all(
+        [importlib.util.find_spec(m) for m in AnthropicGenerator.extra_dependency_names]
+    ),
+    reason="missing optional dependency",
+)
+@pytest.mark.usefixtures("set_fake_env")
+def test_anthropic_uri_threads_to_client_base_url():
+    custom = "https://custom-anthropic-endpoint.example.com"
+    generator = AnthropicGenerator(name=DEFAULT_MODEL_NAME)
+    generator.uri = custom
+    generator._load_unsafe()
+    assert str(generator.client.base_url).startswith(custom)
+
+
 @pytest.mark.skipif(
     not all(
         [importlib.util.find_spec(m) for m in AnthropicGenerator.extra_dependency_names]
