@@ -46,7 +46,12 @@ If work is duplicate/trivial busywork, **do not proceed**. Return a short explan
 
 ### Project Guides
 
-Check the docs on "Contributing" and "Extending", in `docs/source`, and follow these.
+Follow the documentation on contributing too and extending garak. See:
+
+* For selecting contributions: `docs/source/contributing.rst`
+* For writing code: `docs/source/extending.rst`
+* When writing a probe: `docs/source/extending.probe.rst`
+* When writing a generator: `docs/source/extending.generator.rst`
 
 ### Commit messages
 
