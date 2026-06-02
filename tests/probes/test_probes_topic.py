@@ -2,10 +2,10 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import pathlib
+import pytest
 import sqlite3
 from unittest.mock import MagicMock, patch
 
-import pytest
 import wn
 
 import garak._plugins
@@ -80,16 +80,18 @@ def test_topic_wordnet_blocklist_get_initial_nodes(sysnet):
 @pytest.mark.parametrize(
     "first_call_error",
     [
-        sqlite3.OperationalError("no such table: lexicons"),
-        wn.Error("no lexicon found with lang=None and lexicon='oewn:2023'"),
+        sqlite3.OperationalError("database not initialised"),
+        wn.Error("requested lexicon is not installed"),
     ],
     ids=["sqlite_missing_database", "wn_missing_lexicon"],
 )
 def test_topic_wordnet_downloads_missing_lexicon(first_call_error):
     # when the lexicon cannot be opened the probe should download it and retry,
     # rather than letting the underlying error propagate and fail to load.
-    # wn.Error covers the case where the database exists but the requested
-    # lexicon is not installed, see https://github.com/NVIDIA/garak/issues/1230
+    # The recovery path keys off the exception type (sqlite3.OperationalError for
+    # a missing database, wn.Error for a missing lexicon, see
+    # https://github.com/NVIDIA/garak/issues/1230), so the message text here is
+    # only illustrative and does not need to track wn's exact wording.
     loaded_wordnet = MagicMock(name="wn.Wordnet")
     download_path = MagicMock(name="download_tempfile_path")
 
@@ -100,7 +102,7 @@ def test_topic_wordnet_downloads_missing_lexicon(first_call_error):
         patch.object(wn, "download", return_value=download_path) as mock_download,
         patch.object(pathlib.Path, "rmdir"),
     ):
-        probe = garak.probes.topic.WordnetBlockedWords()
+        probe = garak._plugins.load_plugin("probes.topic.WordnetBlockedWords")
 
     assert (
         mock_download.call_count == 1
