@@ -126,7 +126,7 @@ def test_atkgen_probe(classname):
         "probes": {
             "atkgen": {
                 "Tox": {
-                    "red_team_model_type": "test.Single",
+                    "red_team_model_type": "test.Lipsum",
                     "red_team_model_name": "",
                     "generations": 1,
                 }
