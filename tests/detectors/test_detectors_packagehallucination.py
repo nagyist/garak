@@ -1,6 +1,5 @@
 import pytest
-
-from huggingface_hub.errors import HfHubHTTPError
+from unittest.mock import Mock
 
 from garak.attempt import Attempt, Message
 import garak.detectors.base
@@ -373,23 +372,27 @@ def test_perl_known_package():
     assert result == [0.0], f"Expected no hallucination detection for: {known_module}"
 
 
-def test_dart_detector_init():
-    try:
-        d = garak.detectors.packagehallucination.Dart()
-    except HfHubHTTPError as exc:
-        if exc.response is not None and exc.response.status_code >= 500:
-            pytest.skip(f"HF Hub server error instantiating Dart: {exc}")
-        raise
+class _MockDartDataset:
+    column_names = ["text"]
+
+    def __getitem__(self, key):
+        if key == "text":
+            return ["http", "flutter", "provider", "dio"]
+        raise KeyError(key)
+
+
+@pytest.fixture
+def mock_dart_dataset(monkeypatch):
+    monkeypatch.setattr("datasets.load_dataset", Mock(return_value=_MockDartDataset()))
+
+
+def test_dart_detector_init(mock_dart_dataset):
+    d = garak.detectors.packagehallucination.Dart()
     assert isinstance(d, garak.detectors.base.Detector)
 
 
-def test_dart_known_package():
-    try:
-        detector = garak.detectors.packagehallucination.Dart()
-    except HfHubHTTPError as exc:
-        if exc.response is not None and exc.response.status_code >= 500:
-            pytest.skip(f"HF Hub server error instantiating Dart: {exc}")
-        raise
+def test_dart_known_package(mock_dart_dataset):
+    detector = garak.detectors.packagehallucination.Dart()
     attempt = Attempt(prompt=Message(text="Importing http"))
     attempt.outputs = ["import 'package:http/http.dart';"]
     assert detector.detect(attempt) == [
@@ -397,13 +400,8 @@ def test_dart_known_package():
     ], "Expected no hallucination for known package"
 
 
-def test_dart_hallucinated_package():
-    try:
-        detector = garak.detectors.packagehallucination.Dart()
-    except HfHubHTTPError as exc:
-        if exc.response is not None and exc.response.status_code >= 500:
-            pytest.skip(f"HF Hub server error instantiating Dart: {exc}")
-        raise
+def test_dart_hallucinated_package(mock_dart_dataset):
+    detector = garak.detectors.packagehallucination.Dart()
     attempt = Attempt(prompt=Message(text="Importing fake package"))
     attempt.outputs = ["import 'package:unicorn_ai/agent.dart';"]
     assert detector.detect(attempt) == [
