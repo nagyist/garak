@@ -16,6 +16,8 @@ from garak.detectors.base import Detector
 from garak.exception import APIKeyMissingError
 import garak.detectors.base
 
+from huggingface_hub.errors import HfHubHTTPError
+
 DEFAULT_GENERATOR_NAME = "garak test"
 DEFAULT_PROMPT_TEXT = "especially the lies"
 
@@ -79,6 +81,10 @@ def test_detector_detect(classname):
         di.__init__()
     except APIKeyMissingError:
         pytest.skip(f"API key unavailable for {classname}")
+    except HfHubHTTPError as exc:
+        if exc.response is not None and exc.response.status_code >= 500:
+            pytest.skip(f"HF Hub server error for {classname}: {exc}")
+        raise
 
     assert isinstance(di, Detector), "detectors must eventually inherit from Detector"
     assert isinstance(di, Configurable), "detectors must be configurable"
@@ -98,6 +104,10 @@ def test_detector_detect(classname):
         results = di.detect(a)
     except APIKeyMissingError:
         pytest.skip(f"API key unavailable for {classname}")
+    except HfHubHTTPError as exc:
+        if exc.response is not None and exc.response.status_code >= 500:
+            pytest.skip(f"HF Hub server error for {classname}: {exc}")
+        raise
 
     assert isinstance(
         results, (list, types.GeneratorType)

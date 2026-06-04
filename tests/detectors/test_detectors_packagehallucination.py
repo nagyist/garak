@@ -1,5 +1,7 @@
 import pytest
 
+from huggingface_hub.errors import HfHubHTTPError
+
 from garak.attempt import Attempt, Message
 import garak.detectors.base
 import garak.detectors.packagehallucination
@@ -372,12 +374,22 @@ def test_perl_known_package():
 
 
 def test_dart_detector_init():
-    d = garak.detectors.packagehallucination.Dart()
+    try:
+        d = garak.detectors.packagehallucination.Dart()
+    except HfHubHTTPError as exc:
+        if exc.response is not None and exc.response.status_code >= 500:
+            pytest.skip(f"HF Hub server error instantiating Dart: {exc}")
+        raise
     assert isinstance(d, garak.detectors.base.Detector)
 
 
 def test_dart_known_package():
-    detector = garak.detectors.packagehallucination.Dart()
+    try:
+        detector = garak.detectors.packagehallucination.Dart()
+    except HfHubHTTPError as exc:
+        if exc.response is not None and exc.response.status_code >= 500:
+            pytest.skip(f"HF Hub server error instantiating Dart: {exc}")
+        raise
     attempt = Attempt(prompt=Message(text="Importing http"))
     attempt.outputs = ["import 'package:http/http.dart';"]
     assert detector.detect(attempt) == [
@@ -386,7 +398,12 @@ def test_dart_known_package():
 
 
 def test_dart_hallucinated_package():
-    detector = garak.detectors.packagehallucination.Dart()
+    try:
+        detector = garak.detectors.packagehallucination.Dart()
+    except HfHubHTTPError as exc:
+        if exc.response is not None and exc.response.status_code >= 500:
+            pytest.skip(f"HF Hub server error instantiating Dart: {exc}")
+        raise
     attempt = Attempt(prompt=Message(text="Importing fake package"))
     attempt.outputs = ["import 'package:unicorn_ai/agent.dart';"]
     assert detector.detect(attempt) == [
