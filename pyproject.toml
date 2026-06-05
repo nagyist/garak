@@ -86,6 +86,17 @@ authors = [
   { name = "Jacob J. lee" },
   { name = "Eliya Cohen" },
   { name = "Nathan Maine" },
+  { name = "Boao Dong" },
+  { name = "zw5" },
+  { name = "Musaab Hasan" }.
+  { name = "Stefano Amorelli" },
+  { name = "Chris Southerland Jr." },
+  { name = "Lane Poole" },
+  { name = "Aditya Singh" },
+  { name = "Pradyoth Prashanth" },
+  { name = "Oleksandr Sanin" },
+  { name = "Varun Jakkula" },
+  { name = "Kyle Zang" },
 ]
 license = "Apache-2.0"
 license-files = ["LICENSE"]
