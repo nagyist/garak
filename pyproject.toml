@@ -97,6 +97,7 @@ authors = [
   { name = "Oleksandr Sanin" },
   { name = "Varun Jakkula" },
   { name = "Kyle Zang" },
+  { name = "Minh Vu" },
 ]
 license = "Apache-2.0"
 license-files = ["LICENSE"]
