@@ -37,7 +37,26 @@ MODEL_ALIASES = {
 
 
 class BedrockGenerator(Generator):
-    """Interface for AWS Bedrock foundation models using Converse API"""
+    """Interface for AWS Bedrock foundation models using Converse API.
+
+    suppressed_params (set[str], default empty): Bedrock Converse API inference
+    field names to omit from the request inferenceConfig, regardless of whether
+    the corresponding instance attribute is set. Useful for target models that
+    reject specific combinations of inference parameters (for example, Anthropic
+    Claude 4.x on Bedrock rejects sending both temperature and topP). Suppression
+    is applied at request-assembly time, so it overrides per-probe parameter
+    mutation (such as promptinject's _generator_precall_hook). Field names use
+    the Bedrock Converse API spelling (topP, not top_p; maxTokens, not max_tokens).
+
+    Example garak.site.yaml config to suppress topP::
+
+        plugins:
+          generators:
+            bedrock:
+              BedrockGenerator:
+                suppressed_params:
+                  - topP
+    """
 
     active = True
     generator_family_name = "Bedrock"
@@ -49,6 +68,7 @@ class BedrockGenerator(Generator):
         "top_p": 1.0,
         "stop": [],
         "region": "us-east-1",
+        "suppressed_params": set(),
     }
 
     _unsafe_attributes = ["client"]
@@ -104,6 +124,18 @@ class BedrockGenerator(Generator):
                 )
 
         super().__init__(self.name, config_root=config_root)
+        self.suppressed_params = set(self.suppressed_params)
+        _pythonic_names = {
+            "top_p": "topP",
+            "max_tokens": "maxTokens",
+            "stop": "stopSequences",
+        }
+        for param in self.suppressed_params:
+            if param in _pythonic_names:
+                logging.warning(
+                    f"suppressed_params entry '{param}' looks like a Python attribute name; "
+                    f"use the Bedrock API field name '{_pythonic_names[param]}' instead."
+                )
         self._validate_env_var()
         self._load_unsafe()
 
@@ -180,13 +212,19 @@ class BedrockGenerator(Generator):
             return [None]
 
         inference_config = {}
-        if self.temperature is not None:
-            inference_config["temperature"] = float(self.temperature)
-        if hasattr(self, "max_tokens") and self.max_tokens is not None:
-            inference_config["maxTokens"] = int(self.max_tokens)
-        if self.top_p is not None:
-            inference_config["topP"] = float(self.top_p)
-        if self.stop:
+        _field_map = {
+            "temperature": ("temperature", float),
+            "maxTokens": ("max_tokens", int),
+            "topP": ("top_p", float),
+        }
+        for api_field, (attr, coerce) in _field_map.items():
+            if api_field in self.suppressed_params:
+                continue
+            value = getattr(self, attr, None)
+            if value is None:
+                continue
+            inference_config[api_field] = coerce(value)
+        if self.stop and "stopSequences" not in self.suppressed_params:
             inference_config["stopSequences"] = self.stop
 
         call_args = {
@@ -217,10 +255,14 @@ class BedrockGenerator(Generator):
                 return [None]
 
             content_blocks_with_text = [
-                content_block for content_block in message["content"] if "text" in content_block
+                content_block
+                for content_block in message["content"]
+                if "text" in content_block
             ]
             if len(content_blocks_with_text) == 0:
-                logging.error("Malformed response from Bedrock: missing 'text' in content blocks")
+                logging.error(
+                    "Malformed response from Bedrock: missing 'text' in content blocks"
+                )
                 return [None]
 
             text = content_blocks_with_text[0]["text"]
