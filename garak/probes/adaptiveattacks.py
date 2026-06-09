@@ -105,23 +105,3 @@ class AdaptiveAttacks(garak.probes.Probe):
         super().__init__(config_root=config_root)
         if self.follow_prompt_cap:
             self._prune_data(cap=self.soft_probe_prompt_cap)
-
-
-class AdaptiveAttacksFull(AdaptiveAttacks):
-    """Simple adaptive attacks probe (full, no prompt cap)
-
-    Uncapped variant of :class:`AdaptiveAttacks`. Generates one prompt per
-    (seed, suffix) pair without sampling. Inactive by default to avoid
-    duplicating prompts emitted by the capped :class:`AdaptiveAttacks` when
-    both probes are selected. Opt in explicitly with
-    ``--probes adaptiveattacks.AdaptiveAttacksFull``."""
-
-    aliases = ["adaptiveattacks.AdaptiveAttacksFull"]
-    # Opt-in only: keeping this inactive prevents the prompt duplication that
-    # occurs when AdaptiveAttacks (capped) and AdaptiveAttacksFull (uncapped)
-    # are both active in the same run.
-    active = False
-
-    DEFAULT_PARAMS = AdaptiveAttacks.DEFAULT_PARAMS | {
-        "follow_prompt_cap": False,
-    }

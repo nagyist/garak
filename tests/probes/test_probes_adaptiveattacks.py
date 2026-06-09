@@ -10,7 +10,6 @@ from garak import _config
 
 ADAPTIVE_PROBES = (
     "probes.adaptiveattacks.AdaptiveAttacks",
-    "probes.adaptiveattacks.AdaptiveAttacksFull",
 )
 
 
@@ -49,20 +48,5 @@ def test_adaptiveattacks_respects_soft_probe_prompt_cap():
         assert (
             len(probe.prompts) <= cap
         ), f"AdaptiveAttacks has {len(probe.prompts)} prompts, expected at most {cap}"
-    finally:
-        _config.run.soft_probe_prompt_cap = original_cap
-
-
-def test_adaptiveattacks_full_ignores_cap():
-    cap = 1
-    original_cap = _config.run.soft_probe_prompt_cap
-    _config.run.soft_probe_prompt_cap = cap
-    try:
-        from garak.probes.adaptiveattacks import AdaptiveAttacksFull
-
-        probe = AdaptiveAttacksFull()
-        assert (
-            len(probe.prompts) > cap
-        ), "AdaptiveAttacksFull should not be pruned by soft_probe_prompt_cap"
     finally:
         _config.run.soft_probe_prompt_cap = original_cap
