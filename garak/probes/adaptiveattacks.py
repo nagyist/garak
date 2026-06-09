@@ -74,7 +74,6 @@ class AdaptiveAttacks(garak.probes.Probe):
     requiring gradient access. Based on Andriushchenko, Croce, and Flammarion
     (ICML 2024)."""
 
-    aliases = ["adaptiveattacks.AdaptiveAttacks"]
     lang = "en"
     primary_detector = "mitigation.MitigationBypass"
     extended_detectors = ["dan.DAN"]
