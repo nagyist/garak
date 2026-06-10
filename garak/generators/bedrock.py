@@ -39,23 +39,23 @@ MODEL_ALIASES = {
 class BedrockGenerator(Generator):
     """Interface for AWS Bedrock foundation models using Converse API.
 
-    suppressed_params (set[str], default empty): Bedrock Converse API inference
-    field names to omit from the request inferenceConfig, regardless of whether
-    the corresponding instance attribute is set. Useful for target models that
-    reject specific combinations of inference parameters (for example, Anthropic
-    Claude 4.x on Bedrock rejects sending both temperature and topP). Suppression
+    suppressed_params (set[str], default empty): garak attribute names to omit
+    from the Bedrock Converse API inferenceConfig, regardless of whether the
+    corresponding attribute is set. Useful for target models that reject specific
+    combinations of inference parameters (for example, Anthropic Claude 4.x on
+    Bedrock rejects requests that set both temperature and top_p). Suppression
     is applied at request-assembly time, so it overrides per-probe parameter
-    mutation (such as promptinject's _generator_precall_hook). Field names use
-    the Bedrock Converse API spelling (topP, not top_p; maxTokens, not max_tokens).
+    mutation (such as promptinject's _generator_precall_hook). Use garak attribute
+    names (top_p, max_tokens, temperature, stop).
 
-    Example garak.site.yaml config to suppress topP::
+    Example garak.site.yaml config to suppress top_p::
 
         plugins:
           generators:
             bedrock:
               BedrockGenerator:
                 suppressed_params:
-                  - topP
+                  - top_p
     """
 
     active = True
@@ -72,6 +72,15 @@ class BedrockGenerator(Generator):
     }
 
     _unsafe_attributes = ["client"]
+
+    # Maps garak attribute names to (Bedrock inferenceConfig field name, coerce fn).
+    # coerce fn is None for list params, which use a truthy check instead of a None check.
+    _PARAM_MAP = {
+        "temperature": ("temperature", float),
+        "max_tokens": ("maxTokens", int),
+        "top_p": ("topP", float),
+        "stop": ("stopSequences", None),
+    }
 
     def __init__(self, name="", config_root=_config):
         """Initialize the Bedrock generator.
@@ -125,19 +134,14 @@ class BedrockGenerator(Generator):
 
         super().__init__(self.name, config_root=config_root)
         self.suppressed_params = set(self.suppressed_params)
-        _pythonic_names = {
-            "top_p": "topP",
-            "max_tokens": "maxTokens",
-            "stop": "stopSequences",
-        }
-        for param in self.suppressed_params:
-            if param in _pythonic_names:
-                logging.warning(
-                    f"suppressed_params entry '{param}' looks like a Python attribute name; "
-                    f"use the Bedrock API field name '{_pythonic_names[param]}' instead."
-                )
         self._validate_env_var()
         self._load_unsafe()
+        for param in self.suppressed_params:
+            if param not in self._PARAM_MAP:
+                logging.warning(
+                    f"suppressed_params entry '{param}' is not a known BedrockGenerator "
+                    f"parameter. Valid keys are: {sorted(self._PARAM_MAP)}."
+                )
 
     def _validate_env_var(self):
         """Validate and set region from environment variables if not configured.
@@ -212,20 +216,17 @@ class BedrockGenerator(Generator):
             return [None]
 
         inference_config = {}
-        _field_map = {
-            "temperature": ("temperature", float),
-            "maxTokens": ("max_tokens", int),
-            "topP": ("top_p", float),
-        }
-        for api_field, (attr, coerce) in _field_map.items():
-            if api_field in self.suppressed_params:
+        for attr, (api_field, coerce) in self._PARAM_MAP.items():
+            if attr in self.suppressed_params:
                 continue
             value = getattr(self, attr, None)
-            if value is None:
-                continue
-            inference_config[api_field] = coerce(value)
-        if self.stop and "stopSequences" not in self.suppressed_params:
-            inference_config["stopSequences"] = self.stop
+            if coerce is not None:
+                if value is None:
+                    continue
+                inference_config[api_field] = coerce(value)
+            else:
+                if value:
+                    inference_config[api_field] = value
 
         call_args = {
             "modelId": self.name,

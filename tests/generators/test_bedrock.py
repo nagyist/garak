@@ -353,7 +353,7 @@ def test_suppressed_params_blocks_top_p(mock_boto3):
     from garak.generators.bedrock import BedrockGenerator
 
     generator = BedrockGenerator(name="claude-4-5-sonnet")
-    generator.suppressed_params = {"topP"}
+    generator.suppressed_params = {"top_p"}
     generator.top_p = 0.9
     generator.temperature = 0.7
 
@@ -372,7 +372,7 @@ def test_suppression_survives_attribute_mutation(mock_boto3):
     from garak.generators.bedrock import BedrockGenerator
 
     generator = BedrockGenerator(name="claude-4-5-sonnet")
-    generator.suppressed_params = {"topP"}
+    generator.suppressed_params = {"top_p"}
 
     # Simulate promptinject._generator_precall_hook overwriting top_p mid-run
     generator.top_p = 1.0
@@ -386,19 +386,22 @@ def test_suppression_survives_attribute_mutation(mock_boto3):
 
 
 @pytest.mark.usefixtures("set_aws_env", "mock_boto3")
-def test_warn_on_pythonic_suppressed_key(mock_boto3, caplog):
-    """T4: warn at init when suppressed_params uses a Pythonic attribute name instead of API field name."""
+def test_warn_on_unknown_suppressed_key(mock_boto3, caplog):
+    """Warn at init when suppressed_params contains a key not in _PARAM_MAP."""
     import logging
     from garak.generators.bedrock import BedrockGenerator
 
     original_defaults = BedrockGenerator.DEFAULT_PARAMS.copy()
     try:
         BedrockGenerator.DEFAULT_PARAMS = BedrockGenerator.DEFAULT_PARAMS | {
-            "suppressed_params": {"top_p"}
+            "suppressed_params": {"foo"}
         }
         with caplog.at_level(logging.WARNING):
             BedrockGenerator(name="claude-4-5-sonnet")
-        assert any("top_p" in record.message for record in caplog.records)
-        assert any("topP" in record.message for record in caplog.records)
+        matching = [r for r in caplog.records if "foo" in r.message]
+        assert matching, "expected a WARNING mentioning 'foo'"
+        assert any(
+            any(k in r.message for k in BedrockGenerator._PARAM_MAP) for r in matching
+        ), "expected WARNING to list valid keys"
     finally:
         BedrockGenerator.DEFAULT_PARAMS = original_defaults
