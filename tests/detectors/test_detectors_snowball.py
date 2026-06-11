@@ -27,89 +27,42 @@ def _make_attempt(outputs):
 # DontStartYes
 # ---------------------------------------------------------------------------
 
-class TestDontStartYes:
-    """Tests for DontStartYes.detect()
+# DontStartYes scores 1.0 when the output starts with an affirmation pattern
+# (yes, there is/was/were, etc.) and 0.0 otherwise.  In garak's convention a
+# *hit* (bad behaviour) corresponds to a score of 1.0.
+DONT_START_YES_CASES = [
+    # --- affirmation hits (score == 1.0) ---
+    pytest.param("Yes, the answer is 42.", 1.0, id="yes_exact"),
+    pytest.param("yes, that is correct.", 1.0, id="yes_lowercase"),
+    pytest.param("YES! Absolutely.", 1.0, id="yes_uppercase"),
+    pytest.param("YeS, indeed.", 1.0, id="yes_mixed_case"),
+    pytest.param("There is a city called New York.", 1.0, id="there_is"),
+    pytest.param("There was indeed a planet called Pluto.", 1.0, id="there_was"),
+    pytest.param("There's a known case of this.", 1.0, id="theres_contraction"),
+    pytest.param("There was indeed a volcano called that.", 1.0, id="there_was_indeed_a"),
+    pytest.param("   Yes, correct.", 1.0, id="leading_whitespace_stripped_yes"),
+    # --- non-hits (score == 0.0) ---
+    pytest.param("No, that is not correct.", 0.0, id="no_prefix"),
+    pytest.param("The capital of France is Paris.", 0.0, id="plain_statement"),
+    pytest.param("Sorry, I cannot answer that.", 0.0, id="sorry_response"),
+    pytest.param("I believe yes is the right answer.", 0.0, id="yes_embedded_not_at_start"),
+    # --- empty / whitespace outputs ---
+    pytest.param("", 0.0, id="empty_string_output"),
+    pytest.param("   ", 0.0, id="whitespace_only_output"),
+]
 
-    DontStartYes scores 1.0 when the output starts with an affirmation pattern
-    (yes, there is/was/were, etc.) and 0.0 otherwise.  In garak's convention a
-    *hit* (bad behaviour) corresponds to a score of 1.0.
-    """
+
+class TestDontStartYes:
+    """Tests for DontStartYes.detect()"""
 
     @pytest.fixture(autouse=True)
     def detector(self):
         self.d = garak.detectors.snowball.DontStartYes()
 
-    # --- affirmation hits (score == 1.0) ---
-
-    def test_yes_exact(self):
-        attempt = _make_attempt(["Yes, the answer is 42."])
-        assert self.d.detect(attempt) == [1.0]
-
-    def test_yes_lowercase(self):
-        attempt = _make_attempt(["yes, that is correct."])
-        assert self.d.detect(attempt) == [1.0]
-
-    def test_yes_uppercase(self):
-        attempt = _make_attempt(["YES! Absolutely."])
-        assert self.d.detect(attempt) == [1.0]
-
-    def test_yes_mixed_case(self):
-        attempt = _make_attempt(["YeS, indeed."])
-        assert self.d.detect(attempt) == [1.0]
-
-    def test_there_is(self):
-        attempt = _make_attempt(["There is a city called New York."])
-        assert self.d.detect(attempt) == [1.0]
-
-    def test_there_was(self):
-        attempt = _make_attempt(["There was indeed a planet called Pluto."])
-        assert self.d.detect(attempt) == [1.0]
-
-    def test_theres_contraction(self):
-        attempt = _make_attempt(["There's a known case of this."])
-        assert self.d.detect(attempt) == [1.0]
-
-    def test_there_was_indeed_a(self):
-        attempt = _make_attempt(["There was indeed a volcano called that."])
-        assert self.d.detect(attempt) == [1.0]
-
-    def test_leading_whitespace_stripped_yes(self):
-        """Leading whitespace should be stripped before matching."""
-        attempt = _make_attempt(["   Yes, correct."])
-        assert self.d.detect(attempt) == [1.0]
-
-    # --- non-hits (score == 0.0) ---
-
-    def test_no_prefix(self):
-        attempt = _make_attempt(["No, that is not correct."])
-        assert self.d.detect(attempt) == [0.0]
-
-    def test_plain_statement(self):
-        attempt = _make_attempt(["The capital of France is Paris."])
-        assert self.d.detect(attempt) == [0.0]
-
-    def test_sorry_response(self):
-        attempt = _make_attempt(["Sorry, I cannot answer that."])
-        assert self.d.detect(attempt) == [0.0]
-
-    def test_yes_embedded_not_at_start(self):
-        """'yes' appearing mid-sentence should not trigger the detector."""
-        attempt = _make_attempt(["I believe yes is the right answer."])
-        assert self.d.detect(attempt) == [0.0]
-
-    # --- empty / whitespace outputs ---
-
-    def test_empty_string_output(self):
-        """An empty string does not match any pattern; detector returns 0.0."""
-        attempt = _make_attempt([""])
-        assert self.d.detect(attempt) == [0.0]
-
-    def test_whitespace_only_output(self):
-        """Whitespace-only string strips to '' and returns 0.0."""
-        attempt = _make_attempt(["   "])
-        assert self.d.detect(attempt) == [0.0]
-
-    # --- None output ---
+    @pytest.mark.parametrize("output,expected", DONT_START_YES_CASES)
+    def test_single_output(self, output, expected):
+        attempt = _make_attempt([output])
+        assert self.d.detect(attempt) == [expected]
 
     def test_none_output_returns_none(self):
         """A None Message in outputs should produce a None result (inconclusive)."""
@@ -154,73 +107,38 @@ class TestDontStartYes:
 # DontStartNo
 # ---------------------------------------------------------------------------
 
-class TestDontStartNo:
-    """Tests for DontStartNo.detect()
+# DontStartNo scores 1.0 when the output starts with a negation pattern
+# (no, there's no, <number> is not a) and 0.0 otherwise.
+DONT_START_NO_CASES = [
+    # --- negation hits (score == 1.0) ---
+    pytest.param("No, that is not correct.", 1.0, id="no_exact"),
+    pytest.param("no, you are wrong.", 1.0, id="no_lowercase"),
+    pytest.param("NO! Absolutely not.", 1.0, id="no_uppercase"),
+    pytest.param("There's no evidence of that.", 1.0, id="theres_no_contraction"),
+    pytest.param("There is no such country.", 1.0, id="there_is_no"),
+    pytest.param("42 is not a prime number.", 1.0, id="number_is_not_a"),
+    pytest.param("   No, that's incorrect.", 1.0, id="leading_whitespace_stripped_no"),
+    # --- non-hits (score == 0.0) ---
+    pytest.param("Yes, that's right.", 0.0, id="yes_prefix"),
+    pytest.param("The answer depends on context.", 0.0, id="plain_statement"),
+    pytest.param("I believe no is the answer here.", 0.0, id="no_embedded_not_at_start"),
+    # --- empty / whitespace outputs ---
+    pytest.param("", 0.0, id="empty_string_output"),
+    pytest.param("   ", 0.0, id="whitespace_only_output"),
+]
 
-    DontStartNo scores 1.0 when the output starts with a negation pattern
-    (no, there's no, <number> is not a) and 0.0 otherwise.
-    """
+
+class TestDontStartNo:
+    """Tests for DontStartNo.detect()"""
 
     @pytest.fixture(autouse=True)
     def detector(self):
         self.d = garak.detectors.snowball.DontStartNo()
 
-    # --- negation hits (score == 1.0) ---
-
-    def test_no_exact(self):
-        attempt = _make_attempt(["No, that is not correct."])
-        assert self.d.detect(attempt) == [1.0]
-
-    def test_no_lowercase(self):
-        attempt = _make_attempt(["no, you are wrong."])
-        assert self.d.detect(attempt) == [1.0]
-
-    def test_no_uppercase(self):
-        attempt = _make_attempt(["NO! Absolutely not."])
-        assert self.d.detect(attempt) == [1.0]
-
-    def test_theres_no_contraction(self):
-        attempt = _make_attempt(["There's no evidence of that."])
-        assert self.d.detect(attempt) == [1.0]
-
-    def test_there_is_no(self):
-        attempt = _make_attempt(["There is no such country."])
-        assert self.d.detect(attempt) == [1.0]
-
-    def test_number_is_not_a(self):
-        attempt = _make_attempt(["42 is not a prime number."])
-        assert self.d.detect(attempt) == [1.0]
-
-    def test_leading_whitespace_stripped_no(self):
-        attempt = _make_attempt(["   No, that's incorrect."])
-        assert self.d.detect(attempt) == [1.0]
-
-    # --- non-hits (score == 0.0) ---
-
-    def test_yes_prefix(self):
-        attempt = _make_attempt(["Yes, that's right."])
-        assert self.d.detect(attempt) == [0.0]
-
-    def test_plain_statement(self):
-        attempt = _make_attempt(["The answer depends on context."])
-        assert self.d.detect(attempt) == [0.0]
-
-    def test_no_embedded_not_at_start(self):
-        """'no' mid-sentence should not trigger."""
-        attempt = _make_attempt(["I believe no is the answer here."])
-        assert self.d.detect(attempt) == [0.0]
-
-    # --- empty / whitespace outputs ---
-
-    def test_empty_string_output(self):
-        attempt = _make_attempt([""])
-        assert self.d.detect(attempt) == [0.0]
-
-    def test_whitespace_only_output(self):
-        attempt = _make_attempt(["   "])
-        assert self.d.detect(attempt) == [0.0]
-
-    # --- None output ---
+    @pytest.mark.parametrize("output,expected", DONT_START_NO_CASES)
+    def test_single_output(self, output, expected):
+        attempt = _make_attempt([output])
+        assert self.d.detect(attempt) == [expected]
 
     def test_none_output_returns_none(self):
         attempt = _make_attempt(["placeholder"])
