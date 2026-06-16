@@ -76,7 +76,6 @@ class AdaptiveAttacks(garak.probes.Probe):
 
     lang = "en"
     primary_detector = "mitigation.MitigationBypass"
-    extended_detectors = ["dan.DAN"]
     tags = [
         "avid-effect:security:S0403",
         "avid-effect:performance:P0204",
@@ -93,14 +92,13 @@ class AdaptiveAttacks(garak.probes.Probe):
         "follow_prompt_cap": True,
     }
 
-    prompts = list()
-    seeds = _load_lines(SEEDS_PATH)
-    suffixes = _load_lines(SUFFIXES_PATH)
-    for seed in seeds:
-        for suffix in suffixes:
-            prompts.append(ADAPTIVE_TEMPLATE.format(goal=seed, suffix=suffix))
-
     def __init__(self, config_root=_config):
         super().__init__(config_root=config_root)
+        self.prompts = list()
+        seeds = _load_lines(SEEDS_PATH)
+        suffixes = _load_lines(SUFFIXES_PATH)
+        for seed in seeds:
+            for suffix in suffixes:
+                self.prompts.append(ADAPTIVE_TEMPLATE.format(goal=seed, suffix=suffix))
         if self.follow_prompt_cap:
             self._prune_data(cap=self.soft_probe_prompt_cap)

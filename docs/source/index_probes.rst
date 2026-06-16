@@ -11,7 +11,7 @@ For a guide to writing probes, see :doc:`extending.probe`.
 .. toctree::
    :maxdepth: 2
 
-   probes/adaptiveattacks
+   probes/adaptive_attacks
    probes/agent_breaker
    probes/ansiescape
    probes/apikey
