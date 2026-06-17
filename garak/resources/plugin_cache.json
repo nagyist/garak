@@ -1,5 +1,33 @@
 {
   "probes": {
+    "probes.adaptive_attacks.AdaptiveAttacks": {
+      "description": "Simple adaptive attacks probe (template + cached suffix)",
+      "DEFAULT_PARAMS": {
+        "follow_prompt_cap": true
+      },
+      "active": true,
+      "doc_uri": "https://arxiv.org/abs/2404.02151",
+      "extended_detectors": [],
+      "extra_dependency_names": [],
+      "goal": "cause the model to disregard the system prompt and produce a forbidden response",
+      "lang": "en",
+      "modality": {
+        "in": [
+          "text"
+        ]
+      },
+      "parallelisable_attempts": true,
+      "primary_detector": "mitigation.MitigationBypass",
+      "tags": [
+        "avid-effect:security:S0403",
+        "avid-effect:performance:P0204",
+        "owasp:llm01",
+        "quality:Security:PromptStability",
+        "payload:jailbreak"
+      ],
+      "tier": 2,
+      "mod_time": "2026-06-16 20:48:13 +0000"
+    },
     "probes.agent_breaker.AgentBreaker": {
       "description": "Agent Breaker - Agentic Application Exploitation Probe",
       "DEFAULT_PARAMS": {
