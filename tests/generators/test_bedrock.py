@@ -391,17 +391,20 @@ def test_warn_on_unknown_suppressed_key(mock_boto3, caplog):
     import logging
     from garak.generators.bedrock import BedrockGenerator
 
-    original_defaults = BedrockGenerator.DEFAULT_PARAMS.copy()
-    try:
-        BedrockGenerator.DEFAULT_PARAMS = BedrockGenerator.DEFAULT_PARAMS | {
-            "suppressed_params": {"foo"}
+    test_canary = "foo"
+    test_suppressed_params = BedrockGenerator.DEFAULT_PARAMS["suppressed_params"].copy()
+    test_suppressed_params.add(test_canary)
+    config_root = {
+        "generators": {
+            "bedrock": {
+                "BedrockGenerator": {"suppressed_params": test_suppressed_params}
+            }
         }
-        with caplog.at_level(logging.WARNING):
-            BedrockGenerator(name="claude-4-5-sonnet")
-        matching = [r for r in caplog.records if "foo" in r.message]
-        assert matching, "expected a WARNING mentioning 'foo'"
-        assert any(
-            any(k in r.message for k in BedrockGenerator._PARAM_MAP) for r in matching
-        ), "expected WARNING to list valid keys"
-    finally:
-        BedrockGenerator.DEFAULT_PARAMS = original_defaults
+    }
+    with caplog.at_level(logging.WARNING):
+        BedrockGenerator(name="claude-4-5-sonnet", config_root=config_root)
+    matching = [r for r in caplog.records if test_canary in r.message]
+    assert matching, f"expected a WARNING mentioning '{test_canary}'"
+    assert any(
+        any(k in r.message for k in BedrockGenerator._PARAM_MAP) for r in matching
+    ), "expected WARNING to list valid keys"
