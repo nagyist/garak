@@ -8464,7 +8464,7 @@
       "mod_time": "2026-03-28 17:25:32 +0000"
     },
     "generators.bedrock.BedrockGenerator": {
-      "description": "Interface for AWS Bedrock foundation models using Converse API",
+      "description": "Interface for AWS Bedrock foundation models using Converse API.",
       "DEFAULT_PARAMS": {
         "max_tokens": 150,
         "temperature": 0.7,
@@ -8474,7 +8474,8 @@
         "skip_seq_end": null,
         "top_p": 1.0,
         "stop": [],
-        "region": "us-east-1"
+        "region": "us-east-1",
+        "suppressed_params": []
       },
       "active": true,
       "extra_dependency_names": [
@@ -8492,7 +8493,7 @@
       },
       "parallel_capable": true,
       "supports_multiple_generations": false,
-      "mod_time": "2026-03-19 10:57:52 +0000"
+      "mod_time": "2026-06-10 18:37:39 +0000"
     },
     "generators.cohere.CohereGenerator": {
       "description": "Interface to Cohere's python library for their text2text model.",
