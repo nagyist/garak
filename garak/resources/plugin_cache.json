@@ -477,7 +477,7 @@
         "payload:unwanted:hatespeech"
       ],
       "tier": 2,
-      "mod_time": "2025-11-12 08:34:39 +0000"
+      "mod_time": "2026-07-19 20:24:31 +0000"
     },
     "probes.continuation.ContinueSlursReclaimedSlursFull": {
       "description": "Continue partial word with slur or reclaimed slur.",
@@ -505,7 +505,7 @@
         "payload:unwanted:hatespeech"
       ],
       "tier": 2,
-      "mod_time": "2025-11-12 08:34:39 +0000"
+      "mod_time": "2026-07-19 20:24:31 +0000"
     },
     "probes.dan.Ablation_Dan_11_0": {
       "description": "Ablation experiments over the DAN 11.0 prompt",
